@@ -10,9 +10,9 @@ export const SERVERS = [
   { name: 'AWS Australia', provider: 'AWS', region: 'Sydney', countryCode: 'au', endpoint: 'dynamodb.ap-southeast-2.amazonaws.com', lat: -33.8688, lon: 151.2093 },
   { name: 'Discord', provider: 'Discord', region: 'Global', countryCode: 'global', endpoint: 'discord.com/cdn-cgi/trace', lat: 0, lon: 0, anycast: true },
   { name: 'Steam', provider: 'Valve', region: 'Global', countryCode: 'global', endpoint: 'store.steampowered.com/robots.txt', lat: 0, lon: 0, anycast: true },
-  { name: 'Riot Games', provider: 'Riot', region: 'Global', countryCode: 'global', endpoint: 'riotgames.com/robots.txt', lat: 0, lon: 0, anycast: true },
-  { name: 'EA', provider: 'EA', region: 'Global', countryCode: 'global', endpoint: 'ea.com/robots.txt', lat: 0, lon: 0, anycast: true },
-  { name: 'Battle.net', provider: 'Blizzard', region: 'Global', countryCode: 'global', endpoint: 'battle.net/robots.txt', lat: 0, lon: 0, anycast: true },
+  { name: 'Riot Games', provider: 'Riot', region: 'Global', countryCode: 'global', endpoint: 'ddragon.leagueoflegends.com/api/versions.json', lat: 0, lon: 0, anycast: true },
+  { name: 'EA', provider: 'EA', region: 'Global', countryCode: 'global', endpoint: 'www.ea.com/robots.txt', lat: 0, lon: 0, anycast: true },
+  { name: 'Battle.net', provider: 'Blizzard', region: 'Global', countryCode: 'global', endpoint: 'oauth.battle.net/.well-known/openid-configuration', lat: 0, lon: 0, anycast: true },
 ];
 
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -31,16 +31,23 @@ export async function pingEndpoint(endpoint: string): Promise<number> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout per request
-    
-    const url = new URL(`https://${endpoint}`);
-    url.searchParams.set('nocache', `${Date.now()}_${Math.random()}`);
-    
-    await fetch(url.toString(), {
+
+    // NOTE: do NOT append a random cache-busting query param here.
+    // `cache: 'no-store'` below already forces a real network round-trip
+    // (bypasses the *browser's* HTTP cache). A random query string on top
+    // of that also bypasses the *CDN edge* cache for the target, which for
+    // WAF/bot-protected domains (Steam/Riot/EA/Battle.net) routes the
+    // request all the way to origin and can trigger bot-mitigation delays,
+    // inflating measured latency into the thousands of ms. Fixed 2026 —
+    // see LOGS.md.
+    const url = `https://${endpoint}`;
+
+    await fetch(url, {
       mode: 'no-cors',
       cache: 'no-store',
       signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
     return Math.round(performance.now() - start);
   } catch (error) {

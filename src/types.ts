@@ -20,10 +20,18 @@ export interface TestHistory {
 
 export interface NetworkIntel {
   ip: string;
+  ipVersion: 'IPv4' | 'IPv6';
   isp: string;
+  asn?: string;
+  org?: string;
   city: string;
+  region?: string;
   country: string;
+  countryCode?: string;
   lat: number;
   lon: number;
+  timezone?: string;
   connectionType: string;
+  downlink?: number; // Mbps
+  rttEstimate?: number; // ms
 }

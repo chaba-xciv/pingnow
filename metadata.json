@@ -1,6 +1,6 @@
 {
-  "name": "Global Ping Check",
-  "description": "A tool to check ping and packet loss to global gaming servers.",
+  "name": "pingnow - global latency check",
+  "description": "Professional real-time ping, jitter, and network telemetry analysis tool for global gaming & cloud infrastructure.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
