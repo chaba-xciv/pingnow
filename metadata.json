@@ -1,0 +1,6 @@
+{
+  "name": "Global Ping Check",
+  "description": "A tool to check ping and packet loss to global gaming servers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
